@@ -26,7 +26,7 @@ import io.github.fuzzy39.swingRPG.world.World;
  * This class is the primary engine class. 
  * as for now it has miscellaneous useful things. 
  * It's a bit scatter-brained, maybe things will improve in the future?
- * @author jmcra
+ * @author Fuzzy39
  *
  */
 public class Engine 
@@ -57,7 +57,7 @@ public class Engine
 		 */
 	    public Engine(String windowTitle)
 	    {
-	    	System.out.println("Swing RPG engine v 0.0");
+	    	System.out.println("Swing RPG engine v 0.1 | See online at: https://github.com/Fuzzy39/Swing-RPGs");
 	    	
 	    	game = new GamePanel();
 	    	mainUI = new PrimaryWindow(windowTitle, game);
