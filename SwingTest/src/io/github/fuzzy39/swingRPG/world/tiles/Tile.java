@@ -28,7 +28,7 @@ public class Tile implements Drawable
 	
 	public Tile (TileType conf, int x, int y)
 	{
-		bounds = new Rectangle(x,y, Screen.tileSize, Screen.tileSize);
+		bounds = new Rectangle(x,y, Screen.TILE_SIZE, Screen.TILE_SIZE);
 	
 		config = conf;
 		

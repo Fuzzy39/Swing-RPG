@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 
+import io.github.fuzzy39.swingRPG.util.Direction;
 import io.github.fuzzy39.swingRPG.util.Drawable;
 import io.github.fuzzy39.swingRPG.util.Rectangle;
 
@@ -53,7 +54,12 @@ public class Player implements Drawable
 		
 	}
 	
-	protected void update(Screen level)
+	/**
+	 * 
+	 * @param level
+	 * @return The screen that the world should change to. Null if no change.
+	 */
+	protected Screen update(Screen level)
 	{
 		
 		// move to our new position!
@@ -92,10 +98,21 @@ public class Player implements Drawable
 			
 		}
 		
-	
+		
 		
 		velocity.x = reduce(velocity.x, FRICTION);
 		velocity.y = reduce(velocity.y, FRICTION);
+		
+		Direction d = level.shouldTransitionTo(bounds);
+		if(d == null)
+		{
+			return null;
+		}
+		
+		bounds = Screen.boundsOnOtherScreen(d, bounds);
+		
+		return level.getConnection(d);
+		
 	}
 	
 	/**
