@@ -5,9 +5,10 @@ import java.awt.image.BufferedImage;
 
 import io.github.fuzzy39.swingRPG.PrimaryWindow;
 import io.github.fuzzy39.swingRPG.Engine;
-import io.github.fuzzy39.swingRPG.world.Player;
 import io.github.fuzzy39.swingRPG.world.Screen;
 import io.github.fuzzy39.swingRPG.world.World;
+import io.github.fuzzy39.swingRPG.world.entities.EntityType;
+import io.github.fuzzy39.swingRPG.world.entities.UpdatePriority;
 import io.github.fuzzy39.swingRPG.world.tiles.Tile;
 import io.github.fuzzy39.swingRPG.world.tiles.TileType;
 
@@ -62,14 +63,7 @@ public class Main
 		// now we can create the world, woo!
 		// the point is where the player starts, in pixels. tiles are 50 pixels.
 		// yeah, its set in stone for now. eh.
-	    World world = new World(new Point(80,80), createScreen(engine));
-	    
-	    // we need to give the player a texture, if we want to see it.
-	    world.getPlayer().setTexture(greeter);
-	    // note that the player can be moved with WASD or the arrow keys. this cannot be changed, but
-	    // the player speed, acceleration, friction can be:
-	    //Player.MAX_SPEED = 15; // default is 10.
-	    // yeah, all of this is super crude, granted. Maybe it'll get better?
+	    World world = createWorld(engine);
 	    
 	    // lets initialize the engine now that the world has been made.
 	    engine.initialize(world);
@@ -81,8 +75,9 @@ public class Main
 	}
 	
 	
-	private static Screen createScreen(Engine engine)
+	private static World createWorld(Engine engine)
 	{
+		World world = new World();
 		
 		// in order to make the screen, we have to make all of the types of tiles that can exist.
 		
@@ -101,6 +96,11 @@ public class Main
 		o.setTexture(floor);
 		
 		
+		// Entity types.
+		EntityType player = new EntityType(greeter, new Point(40,40));
+		player.setUpdatePriority(UpdatePriority.Always);
+
+		
 		// coins are complicated, and they deserve their own class. but to show that it is not required, this method configures
 		// a coin tile type.
 		// coins display text when you walk on them, and can be picked up and removed.
@@ -117,7 +117,7 @@ public class Main
 		// yes, this is a very ugly way to do this. 
 		// screens are always 16 by 8.
 		
-		return new Screen
+		Screen screen =  new Screen
 		( 
 		   new TileType[][] 
 		   {
@@ -140,8 +140,10 @@ public class Main
 			   {w,o,c,o,w,w,o,w},
 			   {w,o,o,o,w,c,o,w},
 			   {w,w,w,w,w,w,w,w}
-		   }
+		   }, world
 		 );
+		world.initialize(new Point(100,100), player, screen);
+		return world;
 	}
 	
 	private static TileType configureCoin(Engine engine, TileType floor)

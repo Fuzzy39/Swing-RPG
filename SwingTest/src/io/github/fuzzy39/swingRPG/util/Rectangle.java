@@ -41,10 +41,10 @@ public class Rectangle
 	{
 
 
-		return  getLeft()<=other.getRight() 
-				&& getRight() >= other.getLeft()
-				&& getTop() <= other.getBottom() 
-				&& getBottom() >= other.getTop();
+		return  getLeft()<other.getRight() 
+				&& getRight() > other.getLeft()
+				&& getTop() < other.getBottom() 
+				&& getBottom() > other.getTop();
 	}
 	
 	
@@ -64,6 +64,29 @@ public class Rectangle
 		return new Rectangle(newPos, newSize);
 	}
 	
+		
+	
+	public Rectangle Intersection(Rectangle other)
+	{
+		if(!intersects(other))
+		{
+			return null;
+		}
+		
+		
+		int left = getLeft()>other.getLeft()? getLeft() : other.getLeft();
+		int top = getTop()>other.getTop() ? getTop() : other.getTop();
+		
+		int right = getRight()<other.getRight()? getRight() : other.getRight();
+		int bottom =  getRight()<other.getRight()? getRight() : other.getRight();	
+		
+		Point size = new Point(right-left, bottom-top);
+		Point location = new Point(left, top);
+		
+		return new Rectangle(location, size);
+		
+		
+	}
 	
 	@Override
 	public String toString()

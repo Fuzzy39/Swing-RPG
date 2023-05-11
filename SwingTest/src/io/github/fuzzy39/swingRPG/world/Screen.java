@@ -9,6 +9,7 @@ import java.awt.image.ImageObserver;
 import io.github.fuzzy39.swingRPG.util.Direction;
 import io.github.fuzzy39.swingRPG.util.Drawable;
 import io.github.fuzzy39.swingRPG.util.Rectangle;
+import io.github.fuzzy39.swingRPG.world.entities.Entity;
 import io.github.fuzzy39.swingRPG.world.tiles.Tile;
 import io.github.fuzzy39.swingRPG.world.tiles.TileType;
 
@@ -34,6 +35,7 @@ public class Screen implements Drawable
 	 */
 	public final static Point SIZE = new Point(16*TILE_SIZE, 8*TILE_SIZE); 
 	
+	private World world;
 	
 	private BufferedImage backgroundTexture;
 	private Tile[][] level;
@@ -46,9 +48,10 @@ public class Screen implements Drawable
 	 * 
 	 * @param levelMap a 16 by 8 TileType array.
 	 */
-	public Screen(TileType[][] levelMap)
+	public Screen(TileType[][] levelMap, World w)
 	{
 	
+		world = w;
 		
 		if(levelMap.length!=16)
 		{
@@ -75,27 +78,20 @@ public class Screen implements Drawable
 		
 	}
 	
-	public Screen(int x, int y, TileType[][] levelMap)
+	/**
+	 * 
+	 * @param x the x coordinate on the world grid.
+	 * @param y the y coordinate on the world grid.
+	 * @param levelMap a 16 by 8 TileType Array that describes the contents of the screen.
+	 */
+	public Screen(int x, int y, TileType[][] levelMap, World w)
 	{
-		this(levelMap);
+		this(levelMap, w);
 		coords = new Point(x,y);
 	}
 	
 	
-	private void createTile(TileType[][] levelMap, int x, int y)
-	{
-		if(levelMap[x][y] == null)
-		{
-			level[x][y] = null;
-			return;
-		}
-		
-		
-		level[x][y] = new Tile(levelMap[x][y], TILE_SIZE*x, TILE_SIZE*y);
-		
-	}
-	
-	
+
 	
 	/**
 	 * Set the backgound of this screen, rendered behind any tiles.
@@ -123,60 +119,47 @@ public class Screen implements Drawable
 	}
 	
 	
-	
 	/**
-	 * Returns the screen that should be transitioned to should an entity exist with the given bounds.
-	 * @param rect
-	 * @return Returns null if no transition should occur.
+	 * 
+	 * @return
 	 */
-	public Direction shouldTransitionTo(Rectangle rect)
+	public Rectangle getGlobalBounds()
 	{
-		
-		if(rect.getBottom()<0)
+		if(getWorldCoord() == null)
 		{
-			return Direction.UP;
+			return null;
 		}
 		
-		if(rect.getTop()>SIZE.y)
-		{
-			return Direction.DOWN;
-		}
+		Point loc = new Point(coords.x*SIZE.x, coords.y*SIZE.y);
 		
-		if(rect.getRight()<0)
-		{
-			return Direction.LEFT;
-		}
-		
-		if(rect.getLeft()>SIZE.x)
-		{
-			return Direction.RIGHT;
-		}
-		
-		return null;
+		return new Rectangle(loc, SIZE);
 		
 	}
 	
+	/**
+	 * 
+	 * @return Whether this screen has global coordinates.
+	 */
+	public boolean ConnectedToWorld()
+	{
+		return getWorldCoord()!=null;
+	}
 	
+	
+	
+	
+	
+	/**
+	 * Returns whether this screen has another screen connected to it in the specified direction.
+	 * @param d the direction out of this screen that the supposed connection would be.
+	 * @return true if such a connection exists, false otherwise.
+	 */
 	public boolean hasConnection(Direction d)
 	{
 		return connections[d.ordinal()]!=null;
 	}
 	
-	
-	public static Rectangle boundsOnOtherScreen(Direction d, Rectangle prev)
-	{
-		
-		
-		Point toAdd = d.toPoint();
-		toAdd.x *= -SIZE.x;
-		toAdd.y *= -SIZE.y;
-		
-		int x = prev.location.x+toAdd.x;
-		int y = prev.location.y+toAdd.y;
-		
-		return new Rectangle(x, y, prev.size.x, prev.size.y);		
-	
-	}
+
 
 	
 	
@@ -185,45 +168,12 @@ public class Screen implements Drawable
 	 * @param rect
 	 * @return
 	 */
-	public boolean isValidPosition(Rectangle rect)
+	public boolean collidesWithLevel(Rectangle rect)
 	{
-		Rectangle screenBounds = new Rectangle(0,0, SIZE.x,SIZE.y);
 		
-		if(!screenBounds.contains(rect))
-		{	
-			Direction d = Direction.UP;
-			if(hasConnection(d) && rect.getTop()<0)
-			{
-				//return getConnection(d)
-				//		.isValidPosition(boundsOnOtherScreen(d, rect));
-				
-				return true;
-			}
-			
-			d = Direction.DOWN;
-			if(hasConnection(d) && rect.getBottom()>SIZE.y)
-			{
-				//return getConnection(d)
-				//		.isValidPosition(boundsOnOtherScreen(d, rect));
-				return true;
-			}
-			
-			d = Direction.LEFT;
-			if(hasConnection(Direction.LEFT) && rect.getLeft()<0)
-			{
-				//return getConnection(d)
-				//		.isValidPosition(boundsOnOtherScreen(d, rect));
-				return true;
-			}
-			
-			d = Direction.RIGHT;
-			if(hasConnection(d) && rect.getRight()>SIZE.x)
-			{
-				//return getConnection(d)
-				//		.isValidPosition(boundsOnOtherScreen(d, rect));
-				return true;
-			}
-			
+		//rect = rect.Intersection(new Rectangle(0,0, SIZE.x, SIZE.y));
+		if (rect == null)
+		{
 			return false;
 		}
 		
@@ -233,7 +183,10 @@ public class Screen implements Drawable
 		int maxX = (rect.getRight()-1)/TILE_SIZE;
 		int maxY = (rect.getBottom()-1)/TILE_SIZE;
 		
-		//System.out.println("from: "+ topLeft + "to:" +new Point(maxX, maxY));
+		minX = minX<0?0:minX;
+		minY = minY<0?0:minY;
+		maxX = maxX>15?15:maxX;
+		maxY = maxY>7?7:maxY;
 		
 		for(int x = minX; x<=maxX; x++)
 		{
@@ -242,39 +195,84 @@ public class Screen implements Drawable
 				
 				if(!isPassable(x,y))
 				{
-					return false;
+					return true;
 				}
 			}
 		}
 		
-		return true;
+		return false;
 		
 	}
 	
 	
-	private boolean isPassable(int x, int y)
+	/**
+	 * Convert rectangles from a coordinate system where 0,0 is the top left of this screen
+	 * to one where 0,0 is the top left of the screen with world grid coordinates of 0,0.
+	 * May throw IllegalStateException if this screen is not connected to the world.
+	 * @param rect
+	 * @return
+	 */
+	public Rectangle convertToAbsolute(Rectangle rect)
 	{
-		Tile t = level[x][y];
-		if(t==null)
+		if(!ConnectedToWorld())
 		{
-			return true;
+			throw new IllegalStateException(
+					"Screen cannot convert coordinates when it is detached from the world grid.");
+			
 		}
 		
-		return t.config.isPassable();
+		Point loc = new Point(rect.location);
+		
+		loc.x+=coords.x*SIZE.x;
+		loc.y+=coords.y*SIZE.y;
+		
+		return new Rectangle(loc, rect.size);
 	}
 	
 	
+	/**
+	 * Does the inverse of convertToAbsolute.
+	 * May throw IllegalStateException if this screen is not connected to the world.
+	 * @param rect
+	 * @return
+	 * @see convertToAbsolute
+	 */
+	public Rectangle convertToRelative(Rectangle rect)
+	{
+		if(!ConnectedToWorld())
+		{
+			throw new IllegalStateException(
+					"Screen cannot convert coordinates when it is detached from the world grid.");
+			
+		}
+		
+		Point loc = new Point(rect.location);
+		
+		loc.x-=coords.x*SIZE.x;
+		loc.y-=coords.y*SIZE.y;
+		
+		return new Rectangle(loc, rect.size);
+	}
+	
+	
+	/**
+	 * Get the tile with particular coordinates on this screen.
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	public Tile getTile(int x, int y) {return level[x][y];}
 	
 	/**
 	 * Draws the screen. Who could've guessed?
+	 * User code probably shouldn't call this method.
 	 */
 	@Override
 	public void draw(Graphics g, ImageObserver o) 
 	{
 		if(backgroundTexture != null)
 		{
-			g.drawImage(backgroundTexture, 0, 0, 800, 400, Color.white, o);
+			g.drawImage(backgroundTexture, 0, 0, 800, 400, o);
 		}
 		
 		for(Tile[] tiles : level)
@@ -292,7 +290,11 @@ public class Screen implements Drawable
 		
 	}
 	
-	
+	public World getWorld()
+	{
+		return world;
+	}
+
 	/**
 	 * Gets the connection
 	 * @param d
@@ -302,6 +304,38 @@ public class Screen implements Drawable
 		return connections[d.ordinal()];
 	}
 	
+	
+
+	
+	// Private/protected methods
+	
+	private void createTile(TileType[][] levelMap, int x, int y)
+	{
+		if(levelMap[x][y] == null)
+		{
+			level[x][y] = null;
+			return;
+		}
+		
+		
+		level[x][y] = new Tile(this, levelMap[x][y], TILE_SIZE*x, TILE_SIZE*y);
+		
+	}
+	
+	private boolean isPassable(int x, int y)
+	{
+		Tile t = level[x][y];
+		if(t==null)
+		{
+			return true;
+		}
+		
+		return t.config.isPassable();
+	}
+	
+	
+	
+	
 	protected void setConnection(Screen s, Direction d)
 	{
 		connections[d.ordinal()] = s;
@@ -309,10 +343,10 @@ public class Screen implements Drawable
 	
 	/**
 	 * updates all tiles
-	 * @param p
+	 * @param p the player
 	 * @param connections the connections to this screen on 4 cardinal points up down left right
 	 */
-	protected void update(Player p)
+	protected void update(Entity p)
 	{
 	
 		for(Tile[] tiles : level)

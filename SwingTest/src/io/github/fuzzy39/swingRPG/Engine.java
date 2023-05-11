@@ -44,10 +44,12 @@ public class Engine
 	 * proper ui
 	 * 
 	 */		
+		public int playerAcceleration;
 	
 		private PrimaryWindow mainUI;
 		private Controls controls;
 		private GamePanel game;
+		
 		
 	   
 		/**
@@ -57,13 +59,13 @@ public class Engine
 		 */
 	    public Engine(String windowTitle)
 	    {
-	    	System.out.println("Swing RPG engine v 0.1 | See online at: https://github.com/Fuzzy39/Swing-RPGs");
+	    	System.out.println("Swing RPG engine v 0.3 | See online at: https://github.com/Fuzzy39/Swing-RPG");
 	    	
 	    	game = new GamePanel();
 	    	mainUI = new PrimaryWindow(windowTitle, game);
 	    	
 	    	controls = new Controls();
-	        
+	        playerAcceleration = 4;
 	      
 	    }
 	    
@@ -72,7 +74,7 @@ public class Engine
 	    private void update(ActionEvent e)
 	    {
 	    	game.update();
-	    	controls.update(game.getWorld().getPlayer());
+	    	controls.update(game.getWorld().getPlayer(), playerAcceleration);
 	    	
 	    }
 	    
@@ -86,11 +88,17 @@ public class Engine
 	    	{
 	    		throw new IllegalArgumentException("already have been initialized.");
 	    	}
+	    	
+	    	if(map.getInitialized()!= true)
+	    	{
+	    		throw new IllegalArgumentException("world must be initialized before engine initialization");
+	    	}
 	    	game.setWorld(map);
 	    	
 	    	Timer t = new Timer(1000/60, this::update );
 	        t.start();
 	    }
+	    
 	    
 	    
 	    public PrimaryWindow getMainUI()

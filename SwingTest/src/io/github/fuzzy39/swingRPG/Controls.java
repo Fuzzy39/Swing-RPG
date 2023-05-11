@@ -3,7 +3,7 @@ import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 
-import io.github.fuzzy39.swingRPG.world.Player;
+import io.github.fuzzy39.swingRPG.world.entities.Entity;
 
 /**
  * Handles the keyboard controls. Not currently usable in user code.
@@ -52,16 +52,16 @@ public class Controls
 		
 	}
 	
-	protected void update(Player p)	
+	protected void update(Entity player, int vel)	
 	{
-		int vel = Player.ACCELERATION;
+		
 		
 		// player movement is hardcoded at the moment, sorry 
-		if(keysDown[KeyEvent.VK_W] || keysDown[KeyEvent.VK_UP]){p.addVelocity(0, -vel);}
-		if(keysDown[KeyEvent.VK_S] || keysDown[KeyEvent.VK_DOWN]){p.addVelocity(0, vel);}
+		if(keysDown[KeyEvent.VK_W] || keysDown[KeyEvent.VK_UP]){player.addVelocity(0, -vel);}
+		if(keysDown[KeyEvent.VK_S] || keysDown[KeyEvent.VK_DOWN]){player.addVelocity(0, vel);}
 		
-		if(keysDown[KeyEvent.VK_A] || keysDown[KeyEvent.VK_LEFT]) {p.addVelocity(-vel, 0); }
-		if(keysDown[KeyEvent.VK_D] || keysDown[KeyEvent.VK_RIGHT]) {p.addVelocity(vel, 0); }
+		if(keysDown[KeyEvent.VK_A] || keysDown[KeyEvent.VK_LEFT]) {player.addVelocity(-vel, 0); }
+		if(keysDown[KeyEvent.VK_D] || keysDown[KeyEvent.VK_RIGHT]) {player.addVelocity(vel, 0); }
 		
 		
 	}

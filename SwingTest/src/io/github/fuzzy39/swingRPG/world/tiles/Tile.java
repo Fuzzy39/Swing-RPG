@@ -11,23 +11,25 @@ import javax.imageio.ImageIO;
 
 import io.github.fuzzy39.swingRPG.util.Drawable;
 import io.github.fuzzy39.swingRPG.util.Rectangle;
-import io.github.fuzzy39.swingRPG.world.Player;
 import io.github.fuzzy39.swingRPG.world.Screen;
+import io.github.fuzzy39.swingRPG.world.World;
+import io.github.fuzzy39.swingRPG.world.entities.Entity;
 
 
 public class Tile implements Drawable
 {
 	
 	private Rectangle bounds;
-	
+	private World world;
 	
 	
 	private boolean triggered = false;
 	public TileType config;
 	
 	
-	public Tile (TileType conf, int x, int y)
+	public Tile (Screen s, TileType conf, int x, int y)
 	{
+		world = s.getWorld();
 		bounds = new Rectangle(x,y, Screen.TILE_SIZE, Screen.TILE_SIZE);
 	
 		config = conf;
@@ -42,11 +44,17 @@ public class Tile implements Drawable
 	}
 	
 
-	public void update(Player p)
+	public void update(Entity player)
 	{
 		
+		Screen s = world.getCurrentScreen();
+		Rectangle pbounds = new Rectangle(player.getBounds());
+		if(s.ConnectedToWorld())
+		{
+			pbounds =s.convertToRelative(pbounds);
+		}
 		
-		if(p.getBounds().intersects(bounds))
+		if(pbounds.intersects(bounds.inflate(1)))
 		{
 			if(!triggered)
 			{
@@ -75,7 +83,7 @@ public class Tile implements Drawable
 			return;
 		}
 		
-		g.drawImage(config.texture, bounds.location.x, bounds.location.y, bounds.size.x, bounds.size.y, Color.white, o);
+		g.drawImage(config.texture, bounds.location.x, bounds.location.y, bounds.size.x, bounds.size.y, o);
 		
 	}
 

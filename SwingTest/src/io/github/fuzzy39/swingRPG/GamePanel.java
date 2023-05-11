@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-import io.github.fuzzy39.swingRPG.world.Player;
 import io.github.fuzzy39.swingRPG.world.Screen;
 import io.github.fuzzy39.swingRPG.world.World;
 import io.github.fuzzy39.swingRPG.world.tiles.Tile;

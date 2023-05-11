@@ -5,9 +5,10 @@ import java.awt.image.BufferedImage;
 
 import io.github.fuzzy39.swingRPG.PrimaryWindow;
 import io.github.fuzzy39.swingRPG.Engine;
-import io.github.fuzzy39.swingRPG.world.Player;
 import io.github.fuzzy39.swingRPG.world.Screen;
 import io.github.fuzzy39.swingRPG.world.World;
+import io.github.fuzzy39.swingRPG.world.entities.EntityType;
+import io.github.fuzzy39.swingRPG.world.entities.UpdatePriority;
 import io.github.fuzzy39.swingRPG.world.tiles.Tile;
 import io.github.fuzzy39.swingRPG.world.tiles.TileType;
 
@@ -46,7 +47,7 @@ public class Main
 		// first, textures have to be loaded.
 		floor = Engine.loadTexture("bluefloor.jpg");
 		wall = Engine.loadTexture("wall.jpg");
-		greeter= Engine.loadTexture("greeter.jpg");
+		greeter= Engine.loadTexture("player.png");
 		sign = Engine.loadTexture("sign.jpg");
 		coin = Engine.loadTexture("coin.jpg");
 		
@@ -65,12 +66,7 @@ public class Main
 	 
 	    World world = createWorld(engine);
 	    	
-	    // we need to give the player a texture, if we want to see it.
-	    world.getPlayer().setTexture(greeter);
-	    // note that the player can be moved with WASD or the arrow keys. this cannot be changed, but
-	    // the player speed, acceleration, friction can be:
-	    //Player.MAX_SPEED = 15; // default is 10.
-	    // yeah, all of this is super crude, granted. Maybe it'll get better?
+
 	    
 	    // lets initialize the engine now that the world has been made.
 	    engine.initialize(world);
@@ -102,13 +98,19 @@ public class Main
 		o.setTexture(floor);
 		
 		
+		// Entity types.
+		EntityType player = new EntityType(greeter, new Point(50,50));
+		player.setUpdatePriority(UpdatePriority.Always);
 		
 		// create the screen we start on.
 		// yes, this is a very ugly way to do this. 
 		// screens are always 16 by 8.
+		World world = new World();
+		 
+		
 		
 		Screen initial =  new Screen
-		( 0,0,
+		(0,0,
 		   new TileType[][] 
 		   {
 			   
@@ -130,13 +132,12 @@ public class Main
 			   {o,o,o,o,o,o,o,o},
 			   {o,o,o,o,o,o,o,o},
 			   {w,o,o,o,o,o,o,w}
-		   }
+		   }, world
 		 );
+
+		world.initialize(new Point(80,80), player, initial);
 		
 		
-		
-		
-		 World world = new World(new Point(80,80), initial);
 		 
 		 world.addScreen( new Screen
 			( 0,-1,
@@ -161,7 +162,7 @@ public class Main
 				   {w,o,o,o,o,o,o,o},
 				   {w,o,o,o,o,o,o,o},
 				   {w,w,w,w,w,w,w,w}
-			   }
+			   }, world
 			 )
 		);
 		 
@@ -188,7 +189,7 @@ public class Main
 						   {o,o,o,o,o,o,o,w},
 						   {o,o,o,o,o,o,o,w},
 						   {w,w,w,w,w,w,w,w}
-					   }
+					   } , world
 					 )
 				);
 		 
@@ -216,7 +217,7 @@ public class Main
 						   {w,o,o,o,o,o,o,w},
 						   {w,o,o,o,o,o,o,w},
 						   {w,o,o,o,o,o,o,w}
-					   }
+					   }, world
 					 )
 				);
 		
@@ -244,7 +245,7 @@ public class Main
 						   {w,o,o,o,o,o,o,w},
 						   {w,o,o,o,o,o,o,w},
 						   {w,w,w,w,w,w,w,w}
-					   }
+					   }, world
 					 )
 				);
 		return world;
